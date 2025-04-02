@@ -1,15 +1,10 @@
 import { Component } from '@angular/core';
+import { ShoppingListComponent } from './shopping-list.component';
 
 @Component({
   selector: 'app-root',
-  imports: [],
-  template: `
-    <h1>Welcome to {{title}}!</h1>
-
-    
-  `,
-  styles: [],
+  standalone: true,
+  imports: [ShoppingListComponent],
+  template: `<app-shopping-list></app-shopping-list>`
 })
-export class AppComponent {
-  title = 'shopping-list-app2';
-}
+export class AppComponent {}
