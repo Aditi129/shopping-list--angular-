@@ -19,11 +19,31 @@ interface ShoppingItem {
       <hr>
       
       <div class="add-item-form">
-        <input type="text" [(ngModel)]="newItem.name" placeholder="Item Name">
-        <input type="number" [(ngModel)]="newItem.quantity" placeholder="Quantity" min="1">
-        <input type="number" [(ngModel)]="newItem.price" placeholder="Price" min="0" step="0.01">
-        <button (click)="addItem()" class="add-btn">Add Item</button>
-      </div>
+  <div class="form-group">
+    <input type="text" name="itemName" #itemName="ngModel" required [(ngModel)]="newItem.name" placeholder="Item Name">
+    <div *ngIf="itemName.invalid && (itemName.dirty || itemName.touched)" class="error-message">
+      Item name is required
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <input type="number" name="itemQuantity" #itemQuantity="ngModel" required [(ngModel)]="newItem.quantity" 
+      placeholder="Quantity" min="1">
+    <div *ngIf="itemQuantity.invalid && (itemQuantity.dirty || itemQuantity.touched)" class="error-message">
+      Quantity must be at least 1
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <input type="number" name="itemPrice" #itemPrice="ngModel" required [(ngModel)]="newItem.price" 
+      placeholder="Price" min="0.01" step="0.01">
+    <div *ngIf="itemPrice.invalid && (itemPrice.dirty || itemPrice.touched)" class="error-message">
+      Price must be greater than 0
+    </div>
+  </div>
+  
+  <button (click)="addItem()" class="add-btn">Add Item</button>
+</div>
       
       <table>
         <thead>
@@ -134,6 +154,22 @@ interface ShoppingItem {
     .total-row td {
       font-weight: bold;
     }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-right: 10px;
+}
+
+  .error-message {
+      color: red;
+      font-size: 12px;
+      margin-top: 4px;
+}
+
+  input.ng-invalid.ng-touched {
+      border: 1px solid red;
+}
   `]
 })
 export class ShoppingListComponent {
@@ -155,7 +191,7 @@ export class ShoppingListComponent {
   nextId = 6;
   
   addItem(): void {
-    if (this.newItem.name && this.newItem.quantity > 0 && this.newItem.price >= 0) {
+    if (this.newItem.name && this.newItem.quantity > 0 && this.newItem.price > 0) {
       this.items.push({
         id: this.nextId++,
         name: this.newItem.name,
