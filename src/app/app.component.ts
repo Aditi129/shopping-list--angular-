@@ -7,4 +7,4 @@ import { ShoppingListComponent } from './shopping-list.component';
   imports: [ShoppingListComponent],
   template: `<app-shopping-list></app-shopping-list>`
 })
-export class AppComponent {} 
+export class AppComponent {}

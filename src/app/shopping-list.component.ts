@@ -2,6 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// Importing PrimeNG components
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+
 interface ShoppingItem {
   id: number;
   name: string;
@@ -12,71 +20,104 @@ interface ShoppingItem {
 @Component({
   selector: 'app-shopping-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    TableModule, 
+    ButtonModule, 
+    InputTextModule, 
+    InputNumberModule,
+    ToastModule
+  ],
+  providers: [MessageService],
   template: `
     <div class="container">
       <h1>SHOPPING LIST</h1>
       <hr>
       
-      <div class="add-item-form">
-  <div class="form-group">
-    <input type="text" name="itemName" #itemName="ngModel" required [(ngModel)]="newItem.name" placeholder="Item Name">
-    <div *ngIf="itemName.invalid && (itemName.dirty || itemName.touched)" class="error-message">
-      Item name is required
-    </div>
-  </div>
-  
-  <div class="form-group">
-    <input type="number" name="itemQuantity" #itemQuantity="ngModel" required [(ngModel)]="newItem.quantity" 
-      placeholder="Quantity" min="1">
-    <div *ngIf="itemQuantity.invalid && (itemQuantity.dirty || itemQuantity.touched)" class="error-message">
-      Quantity must be at least 1
-    </div>
-  </div>
-  
-  <div class="form-group">
-    <input type="number" name="itemPrice" #itemPrice="ngModel" required [(ngModel)]="newItem.price" 
-      placeholder="Price" min="0.01" step="0.01">
-    <div *ngIf="itemPrice.invalid && (itemPrice.dirty || itemPrice.touched)" class="error-message">
-      Price must be greater than 0
-    </div>
-  </div>
-  
-  <button (click)="addItem()" class="add-btn">Add Item</button>
-</div>
+      <p-toast></p-toast>
       
-      <table>
-        <thead>
+      <div class="add-item-form">
+        <span class="p-float-label">
+          <input 
+            id="item-name" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="newItem.name" 
+            required 
+            #itemName="ngModel">
+          <label for="item-name">Item Name</label>
+        </span>
+        <div *ngIf="itemName.invalid && (itemName.dirty || itemName.touched)" class="error-message">
+          Item name is required
+        </div>
+        
+        <p-inputNumber 
+          [(ngModel)]="newItem.quantity" 
+          placeholder="Quantity" 
+          [min]="1"
+          showButtons
+          buttonLayout="horizontal"
+          inputId="quantity"
+          [style]="{'width': '150px'}">
+        </p-inputNumber>
+        
+        <p-inputNumber 
+          [(ngModel)]="newItem.price" 
+          placeholder="Price" 
+          [min]="0.01"
+          [minFractionDigits]="2"
+          mode="currency" 
+          currency="INR"
+          locale="en-IN"
+          [style]="{'width': '150px'}">
+        </p-inputNumber>
+        
+        <p-button label="Add Item" icon="pi pi-plus" (onClick)="addItem()"></p-button>
+      </div>
+      
+      <p-table [value]="items" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template pTemplate="header">
           <tr>
             <th>S.no</th>
             <th>Item</th>
             <th>Quantity</th>
             <th>Price</th>
             <th>Total</th>
+            <th>Action</th>
           </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of items; let i = index">
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-i="rowIndex">
+          <tr>
             <td>{{ i + 1 }}</td>
+            <td>{{ item.name }}</td>
             <td>
-              {{ item.name }}
-              <button class="delete-btn" (click)="deleteItem(item.id)">Delete</button>
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.quantity" min="1" class="quantity-input" (change)="updateTotals()">
+              <p-inputNumber 
+                [(ngModel)]="item.quantity" 
+                [min]="1"
+                [showButtons]="true"
+                (onInput)="updateTotals()"
+                [style]="{'width': '100px'}">
+              </p-inputNumber>
             </td>
             <td>₹{{ item.price }}</td>
             <td>₹{{ (item.quantity * item.price).toFixed(2) }}</td>
+            <td>
+              <p-button 
+                icon="pi pi-trash" 
+                severity="danger" 
+                (onClick)="deleteItem(item.id)">
+              </p-button>
+            </td>
           </tr>
-          <tr class="total-row">
-            <td>Total Price</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>₹{{ calculateTotal().toFixed(2) }}</td>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <tr>
+            <td colspan="4" style="text-align:right">Total Price:</td>
+            <td colspan="2">₹{{ calculateTotal().toFixed(2) }}</td>
           </tr>
-        </tbody>
-      </table>
+        </ng-template>
+      </p-table>
     </div>
   `,
   styles: [`
@@ -95,8 +136,10 @@ interface ShoppingItem {
     }
 
     hr {
+      display:block;
+      width:100%;
       border: 1px solid black;
-      margin-bottom: 30px;
+      margin-bottom: 10px 0px;
     }
     
     .add-item-form {
@@ -104,72 +147,29 @@ interface ShoppingItem {
       display: flex;
       justify-content: center;
       gap: 10px;
+      align-items: flex-start;
     }
     
-    input {
-      padding: 8px;
-      border: 1px solid #aaa;
-      border-radius: 0;
-    }
-    
-    .add-btn {
-      padding: 8px 16px;
-      background-color: #f0f0f0;
-      color: black;
-      border: 1px solid #aaa;
-      cursor: pointer;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-    }
-    
-    th, td {
-      padding: 12px;
-      border: 1px solid black;
-      background-color: #fefbd8; /* cream color for cells */
-    }
-    
-    th {
-      font-weight: bold;
-      text-align: center;
-    }
-    
-    .delete-btn {
-      background-color: #f0f0f0;
-      border: 1px solid #aaa;
-      padding: 2px 8px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    
-    .quantity-input {
-      width: 50px;
-      text-align: center;
-      padding: 4px;
-    }
-    
-    .total-row td {
-      font-weight: bold;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      margin-right: 10px;
-}
-
-  .error-message {
+    .error-message {
       color: red;
       font-size: 12px;
       margin-top: 4px;
-}
-
-  input.ng-invalid.ng-touched {
-      border: 1px solid red;
-}
+    }
+    
+    :host ::ng-deep .p-button {
+      margin-left: 10px;
+    }
+    
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+      background-color: #f8f9fa;
+      color: #212529;
+      font-weight: bold;
+    }
+    
+    :host ::ng-deep .p-inputnumber-button-down, 
+    :host ::ng-deep .p-inputnumber-button-up {
+      height: 1.5rem !important;
+    }
   `]
 })
 export class ShoppingListComponent {
@@ -190,6 +190,8 @@ export class ShoppingListComponent {
   
   nextId = 6;
   
+  constructor(private messageService: MessageService) {}
+  
   addItem(): void {
     if (this.newItem.name && this.newItem.quantity > 0 && this.newItem.price > 0) {
       this.items.push({
@@ -199,6 +201,13 @@ export class ShoppingListComponent {
         price: this.newItem.price
       });
       
+      // Show success message
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Item Added',
+        detail: `${this.newItem.name} has been added to your shopping list`
+      });
+      
       // Reset the form
       this.newItem = {
         id: 0,
@@ -206,15 +215,30 @@ export class ShoppingListComponent {
         quantity: 1,
         price: 0
       };
+    } else {
+      // Show error message
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Failed to Add Item',
+        detail: 'Please fill all fields correctly'
+      });
     }
   }
   
   deleteItem(id: number): void {
+    const itemToDelete = this.items.find(item => item.id === id);
     this.items = this.items.filter(item => item.id !== id);
+    
+    if (itemToDelete) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Item Removed',
+        detail: `${itemToDelete.name} has been removed from your shopping list`
+      });
+    }
   }
   
   updateTotals(): void {
-    // This function is called when quantity inputs change
     // No need to do anything here as Angular's data binding will update the view
   }
   

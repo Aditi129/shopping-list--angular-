@@ -9,6 +9,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "^19.2.8",
     "@angular/common": "^19.2.0",
     "@angular/compiler": "^19.2.0",
     "@angular/core": "^19.2.0",
@@ -16,6 +17,11 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "@fullcalendar/core": "^6.1.17",
+    "chart.js": "^4.4.8",
+    "primeicons": "^7.0.0",
+    "primeng": "^19.0.10",
+    "quill": "^2.0.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
