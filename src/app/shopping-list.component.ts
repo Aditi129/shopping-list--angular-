@@ -246,3 +246,5 @@ export class ShoppingListComponent {
     return this.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
   }
 }
+
+//main functionality file

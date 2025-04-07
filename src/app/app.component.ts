@@ -8,3 +8,5 @@ import { ShoppingListComponent } from './shopping-list.component';
   template: `<app-shopping-list></app-shopping-list>`
 })
 export class AppComponent {}
+
+
