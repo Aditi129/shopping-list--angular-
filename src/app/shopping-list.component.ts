@@ -187,7 +187,7 @@ export class ShoppingListComponent implements OnInit {
       { id: this.nextId++, name: 'Juice', quantity: 1, price: 3 },
       { id: this.nextId++, name: 'Shoes', quantity: 1, price: 10 },
       { id: this.nextId++, name: 'Bananas', quantity: 1, price: 2 },
-      { id: this.nextId++, name: 'Iron', quantity: 1, price: 7 }
+     
     ];
   }
   openDialog(): void {
