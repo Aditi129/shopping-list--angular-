@@ -1,5 +1,5 @@
 /*import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations'; // ✅ Add this
+import { provideAnimations } from '@angular/platform-browser/animations'; //  Add this
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {
@@ -7,7 +7,7 @@ bootstrapApplication(AppComponent, {
 }).catch(err => console.error(err));*/
 
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations'; // ✅ import
+import { provideAnimations } from '@angular/platform-browser/animations'; //  import
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {

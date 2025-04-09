@@ -37,7 +37,7 @@ interface ShoppingItem {
       
       <p-toast></p-toast>
       
-      <!-- Add Item Button placed above the table -->
+      
       <div style="text-align: right; margin-bottom: 1rem;">
         <button pButton type="button" label="Add Item" icon="pi pi-plus" (click)="displayAddDialog = true"></button>
       </div>
@@ -181,7 +181,7 @@ export class ShoppingListComponent implements OnInit {
   constructor(private messageService: MessageService) {}
   
   ngOnInit() {
-    // Initialize with some sample data
+    // Initialized with  sample data
     this.items = [
       { id: this.nextId++, name: 'Books', quantity: 1, price: 7 },
       { id: this.nextId++, name: 'Juice', quantity: 1, price: 3 },
