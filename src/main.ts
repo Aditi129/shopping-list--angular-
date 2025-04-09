@@ -1,5 +1,5 @@
 /*import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations'; //  Add this
+import { provideAnimations } from '@angular/platform-browser/animations'; //  Added this
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {

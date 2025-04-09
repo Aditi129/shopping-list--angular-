@@ -37,13 +37,12 @@ interface ShoppingItem {
       
       <p-toast></p-toast>
       
-      
       <div style="text-align: right; margin-bottom: 1rem;">
         <button pButton type="button" label="Add Item" icon="pi pi-plus" (click)="displayAddDialog = true"></button>
       </div>
       
       <!-- Shopping List Table -->
-      <p-table [value]="items" dataKey="id" editMode="cell" [tableStyle]="{'min-width': '50rem'}">
+      <p-table #dt [value]="items" dataKey="id" editMode="cell" [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
           <tr>
             <th style="width: 5%">#</th>
@@ -58,10 +57,11 @@ interface ShoppingItem {
           <tr>
             <td>{{ i + 1 }}</td>
             
-            <td pEditableColumn>
+            <td pEditableColumn (click)="saveOriginalValue(item, 'name')">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <input pInputText type="text" [(ngModel)]="item.name" required style="width:100%">
+                  <input pInputText type="text" [(ngModel)]="item.name" required style="width:100%" 
+                         (blur)="onBlur(item, 'name')" (click)="$event.stopPropagation()">
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{ item.name }}
@@ -69,10 +69,11 @@ interface ShoppingItem {
               </p-cellEditor>
             </td>
             
-            <td pEditableColumn>
+            <td pEditableColumn (click)="saveOriginalValue(item, 'quantity')">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <p-inputNumber [(ngModel)]="item.quantity" [min]="1" [showButtons]="true" (onInput)="updateTotals()"></p-inputNumber>
+                  <p-inputNumber [(ngModel)]="item.quantity" [min]="1" [showButtons]="true" (onInput)="updateTotals()"
+                                (blur)="onBlur(item, 'quantity')" (click)="$event.stopPropagation()"></p-inputNumber>
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{ item.quantity }}
@@ -80,10 +81,11 @@ interface ShoppingItem {
               </p-cellEditor>
             </td>
             
-            <td pEditableColumn>
+            <td pEditableColumn (click)="saveOriginalValue(item, 'price')">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <p-inputNumber [(ngModel)]="item.price" [min]="0.01" [minFractionDigits]="2" mode="currency" currency="INR" (onInput)="updateTotals()"></p-inputNumber>
+                  <p-inputNumber [(ngModel)]="item.price" [min]="0.01" [minFractionDigits]="2" mode="currency" currency="INR" (onInput)="updateTotals()"
+                                (blur)="onBlur(item, 'price')" (click)="$event.stopPropagation()"></p-inputNumber>
                 </ng-template>
                 <ng-template pTemplate="output">
                   ₹{{ item.price }}
@@ -178,22 +180,65 @@ export class ShoppingListComponent implements OnInit {
   nextId = 1;
   displayAddDialog = false;
   
+  // Store original values
+  private originalValues: Map<number, Map<string, any>> = new Map();
+  
   constructor(private messageService: MessageService) {}
   
   ngOnInit() {
-    // Initialized with  sample data
+    // Initialized with sample data
     this.items = [
       { id: this.nextId++, name: 'Books', quantity: 1, price: 7 },
       { id: this.nextId++, name: 'Juice', quantity: 1, price: 3 },
       { id: this.nextId++, name: 'Shoes', quantity: 1, price: 10 },
       { id: this.nextId++, name: 'Bananas', quantity: 1, price: 2 },
-     
     ];
   }
+  
+  // Save the original value when starting to edit
+  saveOriginalValue(item: ShoppingItem, field: keyof ShoppingItem): void {
+    if (!this.originalValues.has(item.id)) {
+      this.originalValues.set(item.id, new Map());
+    }
+    
+    const fieldMap = this.originalValues.get(item.id);
+    if (fieldMap && !fieldMap.has(field)) {
+      fieldMap.set(field, item[field]);
+    }
+  }
+  
+  // When focus is lost, check if value is empty and restore if needed
+  onBlur(item: ShoppingItem, field: keyof ShoppingItem): void {
+    // Get the original value from our saved map
+    const fieldMap = this.originalValues.get(item.id);
+    const originalValue = fieldMap?.get(field);
+    
+    if (originalValue !== undefined) {
+      // For text fields, check if empty
+      if (field === 'name' && (!item.name || item.name.trim() === '')) {
+        item.name = originalValue;
+      }
+      // For number fields check if null, undefined or less than minimum
+      else if (field === 'quantity' && (item.quantity === null || item.quantity === undefined || item.quantity < 1)) {
+        item.quantity = originalValue;
+      }
+      else if (field === 'price' && (item.price === null || item.price === undefined || item.price < 0.01)) {
+        item.price = originalValue;
+      }
+      
+      // Clean up stored values
+      if (fieldMap) {
+        fieldMap.delete(field);
+        if (fieldMap.size === 0) {
+          this.originalValues.delete(item.id);
+        }
+      }
+    }
+  }
+  
   openDialog(): void {
     console.log('Opening modal...');
     this.displayAddDialog = true;
-
   }
   
   addItem(): void {
@@ -231,6 +276,9 @@ export class ShoppingListComponent implements OnInit {
   deleteItem(id: number): void {
     const itemToDelete = this.items.find(item => item.id === id);
     this.items = this.items.filter(item => item.id !== id);
+    
+    // Clear any stored original values
+    this.originalValues.delete(id);
     
     if (itemToDelete) {
       this.messageService.add({
