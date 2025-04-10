@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideAnimations(), // Add this for PrimeNG animations
+    provideAnimations(), // for PrimeNG animations
     provideHttpClient()
   ]
 };

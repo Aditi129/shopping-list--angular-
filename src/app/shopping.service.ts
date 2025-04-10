@@ -14,12 +14,14 @@ export interface ShoppingItem {
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class ShoppingService {
-  private apiUrl = 'https://jsonplaceholder.typicode.com/posts'; // dummy endpoint
+  private apiUrl = 'https://jsonplaceholder.typicode.com/posts'; // dummy 
 
   constructor(private http: HttpClient) {}
 
-  // Get all items
+  // Get items
   getItems(): Observable<ShoppingItem[]> {
     const mockItems: ShoppingItem[] = [
       
@@ -28,17 +30,17 @@ export class ShoppingService {
   }
   
 
-  // Add a new item
+  // Add  new item
   addItem(item: ShoppingItem): Observable<ShoppingItem> {
     return this.http.post<ShoppingItem>(this.apiUrl, item);
   }
 
-  // Update an item
+  // Update item
   updateItem(item: ShoppingItem): Observable<ShoppingItem> {
     return this.http.put<ShoppingItem>(`${this.apiUrl}/${item.id}`, item);
   }
 
-  // Delete an item
+  // Delete item
   deleteItem(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
