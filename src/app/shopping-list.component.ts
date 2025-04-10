@@ -8,6 +8,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
+import { ShoppingService } from './shopping.service';
+
+
 
 interface ShoppingItem {
   id: number;
@@ -183,17 +186,19 @@ export class ShoppingListComponent implements OnInit {
   // Store original values
   private originalValues: Map<number, Map<string, any>> = new Map();
   
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private shoppingService: ShoppingService  
+  ) {}
+  
   
   ngOnInit() {
-    // Initialized with sample data
-    this.items = [
-      { id: this.nextId++, name: 'Books', quantity: 1, price: 7 },
-      { id: this.nextId++, name: 'Juice', quantity: 1, price: 3 },
-      { id: this.nextId++, name: 'Shoes', quantity: 1, price: 10 },
-      { id: this.nextId++, name: 'Bananas', quantity: 1, price: 2 },
-    ];
+    this.shoppingService.getItems().subscribe(data => {
+      this.items = data.slice(0, 5); // Limiting for dummy API
+      this.nextId = Math.max(...this.items.map(i => i.id)) + 1;
+    });
   }
+  
   
   // Save the original value when starting to edit
   saveOriginalValue(item: ShoppingItem, field: keyof ShoppingItem): void {
@@ -207,35 +212,42 @@ export class ShoppingListComponent implements OnInit {
     }
   }
   
-  // When focus is lost, check if value is empty and restore if needed
   onBlur(item: ShoppingItem, field: keyof ShoppingItem): void {
-    // Get the original value from our saved map
     const fieldMap = this.originalValues.get(item.id);
     const originalValue = fieldMap?.get(field);
-    
-    if (originalValue !== undefined) {
-      // For text fields, check if empty
-      if (field === 'name' && (!item.name || item.name.trim() === '')) {
-        item.name = originalValue;
-      }
-      // For number fields check if null, undefined or less than minimum
-      else if (field === 'quantity' && (item.quantity === null || item.quantity === undefined || item.quantity < 1)) {
-        item.quantity = originalValue;
-      }
-      else if (field === 'price' && (item.price === null || item.price === undefined || item.price < 0.01)) {
-        item.price = originalValue;
-      }
-      
-      // Clean up stored values
-      if (fieldMap) {
-        fieldMap.delete(field);
-        if (fieldMap.size === 0) {
-          this.originalValues.delete(item.id);
-        }
-      }
+  
+    let isValid = true;
+  
+    if (field === 'name' && (!item.name || item.name.trim() === '')) {
+      item.name = originalValue;
+      isValid = false;
+    } else if (field === 'quantity' && item.quantity < 1) {
+      item.quantity = originalValue;
+      isValid = false;
+    } else if (field === 'price' && item.price < 0.01) {
+      item.price = originalValue;
+      isValid = false;
+    }
+  
+    if (isValid) {
+      this.shoppingService.updateItem(item).subscribe(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Item Updated',
+          detail: `${field} updated successfully`
+        });
+      });
+    }
+  
+    if (fieldMap) {
+      fieldMap.delete(field);
+      if (fieldMap.size === 0) this.originalValues.delete(item.id);
     }
   }
   
+
+
+
   openDialog(): void {
     console.log('Opening modal...');
     this.displayAddDialog = true;
@@ -243,51 +255,36 @@ export class ShoppingListComponent implements OnInit {
   
   addItem(): void {
     if (this.newItem.name && this.newItem.quantity > 0 && this.newItem.price > 0) {
-      this.items.push({
-        id: this.nextId++,
-        name: this.newItem.name,
-        quantity: this.newItem.quantity,
-        price: this.newItem.price
-      });
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Item Added',
-        detail: `${this.newItem.name} has been added to your shopping list`
-      });
-      
-      // Reset the form and close dialog
-      this.newItem = {
-        id: 0,
-        name: '',
-        quantity: 1,
-        price: 0
-      };
-      this.displayAddDialog = false;
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Failed to Add Item',
-        detail: 'Please fill all fields correctly'
+      const itemToAdd = { ...this.newItem, id: this.nextId++ };
+  
+      this.shoppingService.addItem(itemToAdd).subscribe((response) => {
+        this.items.push(response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Item Added',
+          detail: `${response.name} has been added`
+        });
+  
+        this.newItem = { id: 0, name: '', quantity: 1, price: 0 };
+        this.displayAddDialog = false;
       });
     }
   }
   
+  
   deleteItem(id: number): void {
-    const itemToDelete = this.items.find(item => item.id === id);
-    this.items = this.items.filter(item => item.id !== id);
-    
-    // Clear any stored original values
-    this.originalValues.delete(id);
-    
-    if (itemToDelete) {
+    this.shoppingService.deleteItem(id).subscribe(() => {
+      const itemToDelete = this.items.find(item => item.id === id);
+      this.items = this.items.filter(item => item.id !== id);
+  
       this.messageService.add({
         severity: 'info',
         summary: 'Item Removed',
-        detail: `${itemToDelete.name} has been removed from your shopping list`
+        detail: `${itemToDelete?.name} has been removed`
       });
-    }
+    });
   }
+  
   
   updateTotals(): void {
     // Angular will automatically update the view due to data binding
