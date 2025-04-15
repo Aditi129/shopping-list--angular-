@@ -8,7 +8,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
-import { ShoppingService } from './shopping.service';
+import { ShoppingService } from './services/shopping.service';
 
 
 
@@ -45,7 +45,19 @@ interface ShoppingItem {
       </div>
       
       <!-- Shopping List Table -->
-      <p-table #dt [value]="items" dataKey="id" editMode="cell" [tableStyle]="{'min-width': '50rem'}">
+      <p-table
+  #dt
+  [value]="items"
+  dataKey="id"
+  editMode="cell"
+  [tableStyle]="{'min-width': '50rem'}"
+  [paginator]="true"
+  [rows]="5"
+  [rowsPerPageOptions]="[3,4,10]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+>
+
         <ng-template pTemplate="header">
           <tr>
             <th style="width: 5%">#</th>
