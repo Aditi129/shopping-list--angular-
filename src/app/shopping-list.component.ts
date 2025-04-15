@@ -60,7 +60,7 @@ interface ShoppingItem {
 
         <ng-template pTemplate="header">
           <tr>
-            <th style="width: 5%">#</th>
+            <th style="width: 5%">Sr. no</th>
             <th style="width: 25%">Item</th>
             <th style="width: 20%">Quantity</th>
             <th style="width: 20%">Price</th>
@@ -108,7 +108,8 @@ interface ShoppingItem {
               </p-cellEditor>
             </td>
             
-            <td>₹{{ (item.quantity * item.price).toFixed(2) }}</td>
+            <td>₹{{ (item.quantity && item.price) ? (item.quantity * item.price).toFixed(2) : '0.00' }}</td>
+
             
             <td>
               <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" (click)="deleteItem(item.id)"></button>
