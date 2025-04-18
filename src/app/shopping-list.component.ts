@@ -9,6 +9,8 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { ShoppingService } from './services/shopping.service';
+import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface ShoppingItem {
   id: number;
@@ -40,6 +42,8 @@ interface ShoppingItem {
       
       <div style="text-align: right; margin-bottom: 1rem;">
         <button pButton type="button" label="Add Item" icon="pi pi-plus" (click)="displayAddDialog = true"></button>
+        <button pButton type="button" label="API List" icon="pi pi-server" (click)="navigateToApiList()" 
+                class="p-button-secondary" style="margin-left: 8px;"></button>
       </div>
       
       <p-table
@@ -50,7 +54,7 @@ interface ShoppingItem {
         [tableStyle]="{'min-width': '50rem'}"
         [paginator]="true"
         [rows]="5"
-        [rowsPerPageOptions]="[3,4,10]"
+        [rowsPerPageOptions]="[3,6,5]"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
       >
@@ -114,7 +118,8 @@ interface ShoppingItem {
         </ng-template>
       </p-table>
       
-      <p-dialog header="Add New Item" [(visible)]="displayAddDialog" [modal]="true" [style]="{width: '400px'}" [draggable]="false" [resizable]="false" [baseZIndex]="10000">
+      <p-dialog header="Add New Item" [(visible)]="displayAddDialog" [modal]="true" [style]="{width: '400px'}" 
+      [draggable]="false" [resizable]="false" [baseZIndex]="10000">
         <div class="p-fluid">
           <div class="field" style="margin-bottom: 1rem;">
             <label for="name">Item Name</label>
@@ -163,6 +168,17 @@ interface ShoppingItem {
     :host ::ng-deep .p-button.p-button-icon-only {
       width: 2.5rem;
     }
+    :host ::ng-deep .p-paginator .p-dropdown {
+      visibility: visible;
+      opacity: 1;
+    }
+    :host ::ng-deep .p-paginator {
+  position: relative;
+  z-index: 100;
+}
+:host ::ng-deep .p-dropdown-panel {
+  z-index: 1000 !important;
+}
   `]
 })
 export class ShoppingListComponent implements OnInit {
@@ -173,17 +189,26 @@ export class ShoppingListComponent implements OnInit {
 
   constructor(
     private messageService: MessageService,
-    private shoppingService: ShoppingService  
+    private shoppingService: ShoppingService,
+    private router: Router,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.loadItems();
   }
 
+  navigateToApiList() {
+    this.router.navigate(['/api-shopping-list']).then(() => {
+      this.cd.detectChanges();
+    });
+  }
+
   loadItems() {
     this.shoppingService.getItems().subscribe({
       next: (data) => {
         this.items = data;
+        this.cd.detectChanges();
       },
       error: () => {
         this.messageService.add({
