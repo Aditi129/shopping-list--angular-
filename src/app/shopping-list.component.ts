@@ -9,8 +9,6 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { ShoppingService } from './services/shopping.service';
-import { Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
 
 interface ShoppingItem {
   id: number;
@@ -42,8 +40,6 @@ interface ShoppingItem {
       
       <div style="text-align: right; margin-bottom: 1rem;">
         <button pButton type="button" label="Add Item" icon="pi pi-plus" (click)="displayAddDialog = true"></button>
-        <button pButton type="button" label="API List" icon="pi pi-server" (click)="navigateToApiList()" 
-                class="p-button-secondary" style="margin-left: 8px;"></button>
       </div>
       
       <p-table
@@ -54,7 +50,7 @@ interface ShoppingItem {
         [tableStyle]="{'min-width': '50rem'}"
         [paginator]="true"
         [rows]="5"
-        [rowsPerPageOptions]="[3,6,5]"
+        [rowsPerPageOptions]="[3,4,10]"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
       >
@@ -118,8 +114,7 @@ interface ShoppingItem {
         </ng-template>
       </p-table>
       
-      <p-dialog header="Add New Item" [(visible)]="displayAddDialog" [modal]="true" [style]="{width: '400px'}" 
-      [draggable]="false" [resizable]="false" [baseZIndex]="10000">
+      <p-dialog header="Add New Item" [(visible)]="displayAddDialog" [modal]="true" [style]="{width: '400px'}" [draggable]="false" [resizable]="false" [baseZIndex]="10000">
         <div class="p-fluid">
           <div class="field" style="margin-bottom: 1rem;">
             <label for="name">Item Name</label>
@@ -168,17 +163,59 @@ interface ShoppingItem {
     :host ::ng-deep .p-button.p-button-icon-only {
       width: 2.5rem;
     }
-    :host ::ng-deep .p-paginator .p-dropdown {
-      visibility: visible;
-      opacity: 1;
-    }
-    :host ::ng-deep .p-paginator {
-  position: relative;
-  z-index: 100;
+    :host ::ng-deep .p-datatable {
+  font-family: Arial, sans-serif;
 }
-:host ::ng-deep .p-dropdown-panel {
-  z-index: 1000 !important;
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+  font-weight: 600;
 }
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+:host ::ng-deep .p-paginator {
+  padding: 1rem;
+}
+:host ::ng-deep .p-datatable {
+  font-family: Arial, sans-serif;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+:host ::ng-deep .p-paginator {
+  padding: 1rem;
+}
+    
   `]
 })
 export class ShoppingListComponent implements OnInit {
@@ -189,26 +226,17 @@ export class ShoppingListComponent implements OnInit {
 
   constructor(
     private messageService: MessageService,
-    private shoppingService: ShoppingService,
-    private router: Router,
-    private cd: ChangeDetectorRef
+    private shoppingService: ShoppingService  
   ) {}
 
   ngOnInit() {
     this.loadItems();
   }
 
-  navigateToApiList() {
-    this.router.navigate(['/api-shopping-list']).then(() => {
-      this.cd.detectChanges();
-    });
-  }
-
   loadItems() {
     this.shoppingService.getItems().subscribe({
       next: (data) => {
         this.items = data;
-        this.cd.detectChanges();
       },
       error: () => {
         this.messageService.add({
