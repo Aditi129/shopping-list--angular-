@@ -163,6 +163,33 @@ interface ShoppingItem {
     :host ::ng-deep .p-button.p-button-icon-only {
       width: 2.5rem;
     }
+    :host ::ng-deep .p-datatable {
+  font-family: Arial, sans-serif;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 1rem 1rem;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+:host ::ng-deep .p-paginator {
+  padding: 1rem;
+}
+    
   `]
 })
 export class ShoppingListComponent implements OnInit {
